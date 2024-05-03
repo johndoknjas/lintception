@@ -1,0 +1,6 @@
+__pycache__/
+*.txt
+!ideas.txt
+*.pem
+*.svg
+*.egg-info/

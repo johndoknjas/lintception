@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">= 3.8"
+name = "lintception"
+version = "0.0.1"
+authors = [
+  { name="John Doknjas", email="jdoknjas@sfu.ca" },
+]
+description = "Runs a few popular linters in sequence (mypy, vulture, vermin), and also does some other checks."
+keywords = ["linter", "mypy", "vulture", "vermin", "testing", "linting", "lintception"]
+dependencies = [
+  "mypy",
+  "vulture",
+  "vermin",
+]
+readme = "README.md"
+
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Operating System :: OS Independent",
+]
+
+[project.scripts]
+lintception = "lintception:main.main"
+
+[project.urls]
+Homepage = "https://github.com/johndoknjas/lintception"
+
+[tool.setuptools]
+packages = ["lintception"]
