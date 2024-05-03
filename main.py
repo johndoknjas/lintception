@@ -6,7 +6,7 @@ import lintception.main
 import sys
 
 def main() -> None:
-    lintception.main.main(sys.argv)
+    lintception.main.main(sys.argv[1:])
 
 if __name__ == '__main__':
     main()
