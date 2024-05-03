@@ -5,11 +5,11 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">= 3.8"
 name = "lintception"
-version = "0.0.1"
+version = "1.0.0"
 authors = [
   { name="John Doknjas", email="jdoknjas@sfu.ca" },
 ]
-description = "Runs a few popular linters in sequence (mypy, vulture, vermin), and also does some other checks."
+description = "Runs a few popular linters in series (mypy, vulture, vermin), and also does some other checks."
 keywords = ["linter", "mypy", "vulture", "vermin", "testing", "linting", "lintception"]
 dependencies = [
   "mypy",
