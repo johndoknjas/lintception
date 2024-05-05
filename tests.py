@@ -10,7 +10,7 @@ class Tests:
     """
 
     def test_self(self):
-        lintception.main.main(['lintception'])
+        lintception.main.main()
 
 if __name__ == '__main__':
     raise RuntimeError("Should call with pytest")

@@ -43,4 +43,5 @@ def run_linters(settings: dict) -> None:
     test_vulture()
     test_mypy()
     test_vermin(settings)
+    print('vulture, mypy, and vermin found no errors!\n')
     test_future_annotations()
