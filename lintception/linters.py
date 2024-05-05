@@ -4,8 +4,9 @@ from subprocess import PIPE
 import glob
 import vulture # type: ignore
 import mypy.api
+from copy import deepcopy
 
-from typing import Optional
+from . import Utils
 
 def test_vulture() -> None:
     v = vulture.Vulture()
@@ -14,41 +15,40 @@ def test_vulture() -> None:
     # https://stackoverflow.com/a/59564370/7743427
 
 def test_mypy() -> None:
-    assert mypy.api.run(['.']) == (f'Success: no issues found in {num_python_files()} source files\n', '', 0)
+    assert mypy.api.run(['.']) == (
+        f'Success: no issues found in {Utils.num_python_files()} source files\n', '', 0
+    )
     # https://mypy.readthedocs.io/en/stable/extending_mypy.html#integrating-mypy-into-another-python-application
 
-def test_vermin(module_names: Optional[list[str]]) -> None:
-    if not module_names:
+def test_vermin(settings: dict) -> None:
+    if not settings['ModuleNames']:
         return
-    result = subprocess.run(['vermin', module_names[0]], stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    expected_ending = "Minimum required versions: 3.8\nIncompatible versions:     2"
+    settings = deepcopy(settings)
+
+    result = subprocess.run(['vermin', settings['ModuleNames'][0]], stdout=PIPE,
+                            stderr=PIPE, universal_newlines=True)
+    expected_ending = (f"Minimum required versions: {settings['MinVersion']}\n" +
+                       f"Incompatible versions:     {settings['NumIncompatibleVersions']}")
     assert result.stdout.strip().endswith(expected_ending)
     assert (result.returncode, result.stderr) == (0, '')
-    test_vermin(module_names[1:])
+    settings['ModuleNames'].pop(0)
+    test_vermin(settings)
 
 def test_future_annotations() -> None:
     for filename in glob.iglob('**/*.py', recursive=True):
         assert filename.endswith(".py")
         with open(filename) as file:
             first_code_line = next(
-                (line.rstrip('\n') for line in file.readlines() if is_code_line(line)), None
+                (line.rstrip('\n') for line in file.readlines() if Utils.is_code_line(line)), None
             )
             if filename.endswith('__init__.py'):
                 assert first_code_line is None
             else:
                 assert first_code_line == "from __future__ import annotations"
 
-# Helpers:
-
-def is_code_line(line: str) -> bool:
-    return (bool(line.strip()) and not line.lstrip().startswith(('#', '"""')) and
-            not line.rstrip().endswith('"""'))
-
-def num_python_files() -> int:
-    return len(list(glob.iglob('**/*.py', recursive=True)))
-
-def run_linters(module_names: Optional[list[str]] = None) -> None:
+def run_linters(settings: dict) -> None:
+    Utils.assertions_for_settings_dict(settings)
     test_vulture()
     test_mypy()
-    test_vermin(module_names)
+    test_vermin(settings)
     test_future_annotations()
