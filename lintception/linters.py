@@ -4,7 +4,6 @@ from subprocess import PIPE
 import glob
 import vulture # type: ignore
 import mypy.api
-from copy import deepcopy
 
 from . import Utils
 
@@ -21,18 +20,11 @@ def test_mypy() -> None:
     # https://mypy.readthedocs.io/en/stable/extending_mypy.html#integrating-mypy-into-another-python-application
 
 def test_vermin(settings: dict) -> None:
-    if not settings['ModuleNames']:
-        return
-    settings = deepcopy(settings)
-
-    result = subprocess.run(['vermin', settings['ModuleNames'][0]], stdout=PIPE,
-                            stderr=PIPE, universal_newlines=True)
+    result = subprocess.run(['vermin', '.'], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     expected_ending = (f"Minimum required versions: {settings['MinVersion']}\n" +
                        f"Incompatible versions:     {settings['NumIncompatibleVersions']}")
     assert result.stdout.strip().endswith(expected_ending)
     assert (result.returncode, result.stderr) == (0, '')
-    settings['ModuleNames'].pop(0)
-    test_vermin(settings)
 
 def test_future_annotations() -> None:
     for filename in glob.iglob('**/*.py', recursive=True):

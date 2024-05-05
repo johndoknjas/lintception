@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import lintception.main
-import sys
 
 def main() -> None:
-    lintception.main.main(sys.argv[1:])
+    lintception.main.main()
 
 if __name__ == '__main__':
     main()
