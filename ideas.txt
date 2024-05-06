@@ -2,4 +2,19 @@
 
 - Add a way for the user to optionally test that the entire vermin output message matches some string.
 
+- Add a way for the user to specify any files that should be empty (e.g., __init__ file). By default,
+  just test that __init__ files (and only them) are empty, like you do now.
+    - If the files are in a folder, have the user be able to specify this somehow, without using
+      os-specific path notation in the .lintception file.
+
+- Add a way for the user to exclude a certain file from being tested by vulture. E.g., run lintception
+  on the python stockfish project, stuff in `models.py` is unused but that's fine.
+
 - Test flake8 with flags github actions use?
+
+# For the `my_linter.py` script, consider adding a way to only count a function call if it's
+      non-recursive.
+        # E.g., could track the lines of all the functions in the project, and then if the latest function
+          a call is after is the same function as the one being called, it's likely recursive (or a global call).
+
+# If the argument list of a function is >= 4 lines long, don't say it's missing an -> annotation.
