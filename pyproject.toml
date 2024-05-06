@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 requires-python = ">= 3.8"
 name = "lintception"
-version = "1.0.0"
+version = "1.0.1"
 authors = [
   { name="John Doknjas", email="jdoknjas@sfu.ca" },
 ]
