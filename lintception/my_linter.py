@@ -1,6 +1,7 @@
 from __future__ import annotations
 import glob
 from dataclasses import dataclass
+from itertools import count
 
 @dataclass
 class Func:
@@ -26,8 +27,10 @@ def find_func_references(lines: list[str], func: Func) -> list[int]:
 def output_funcs_with_no_arrow(lines: list[str], funcs: list[Func]) -> None:
     print("Functions without a '->':\n")
     for func in funcs:
-        if all('->' not in line for line in lines[func.line_index:func.line_index+3]):
-            print(f"{func} possibly does not have a '->'")
+        line = next(lines[i] for i in count(func.line_index) if ')' in lines[i])
+        assert line.endswith(':')
+        if ') -> ' not in line:
+            print(f"{func} does not have a return type annotation")
 
 def main() -> None:
     lines: list[str] = []

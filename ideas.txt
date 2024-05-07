@@ -12,9 +12,9 @@
 
 - Test flake8 with flags github actions use?
 
-# For the `my_linter.py` script, consider adding a way to only count a function call if it's
-      non-recursive.
-        # E.g., could track the lines of all the functions in the project, and then if the latest function
-          a call is after is the same function as the one being called, it's likely recursive (or a global call).
+- For the `my_linter.py` script, consider adding a way to only count a function call if it's non-recursive.
+    - E.g., could track the lines of all the functions in the project, and then if the latest function
+      a call is after is the same function as the one being called, it's likely recursive (or a global call).
 
-# If the argument list of a function is >= 4 lines long, don't say it's missing an -> annotation.
+# Test that there are no function definitions with the same name as commonly used (esp builtin)
+  function names. E.g., sum, count (from itertools), all, any, etc.
