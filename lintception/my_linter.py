@@ -1,24 +1,7 @@
 from __future__ import annotations
-import glob
-from dataclasses import dataclass
 from itertools import count
-
-@dataclass
-class Func:
-    name: str
-    line_index: int
-
-def find_funcs(lines: list[str]) -> list[Func]:
-    """`lines` are all the lines of code. The function will go through it and find all function definitions,
-       putting each function name and line index into the list that's returned."""
-    funcs: list[Func] = []
-    for i, code_line in enumerate(lines):
-        words = code_line.split()
-        if not words or words[0] != 'def':
-            continue
-        assert '(' in words[1]
-        funcs.append(Func(words[1].split('(')[0], i))
-    return funcs
+from . import Utils
+from .Utils import Func
 
 def find_func_references(lines: list[str], func: Func) -> list[int]:
     """Note that this doesn't include the function's definition."""
@@ -33,13 +16,8 @@ def output_funcs_with_no_arrow(lines: list[str], funcs: list[Func]) -> None:
             print(f"{func} does not have a return type annotation")
 
 def main() -> None:
-    lines: list[str] = []
-    for filename in glob.iglob('**/*.py', recursive=True):
-        if filename == "tests.py":
-            continue
-        with open(filename) as file:
-            lines.extend(file.read().splitlines())
-    funcs: list[Func] = find_funcs(lines)
+    lines = Utils.get_lines_all_py_files(["tests.py"])
+    funcs: list[Func] = Utils.find_funcs(lines)
     output_funcs_with_no_arrow(lines, funcs)
     funcs_used_once: list[tuple[Func, int]] = []
     print("\n\nUnused functions:\n")
