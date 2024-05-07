@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import lintception.main
+from lintception import linters
 
 class Tests:
     """
@@ -10,7 +10,7 @@ class Tests:
     """
 
     def test_self(self):
-        lintception.main.main()
+        assert linters.run_linters() == linters.LintResult.SUCCESS
 
 if __name__ == '__main__':
     raise RuntimeError("Should call with pytest")
