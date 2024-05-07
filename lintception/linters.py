@@ -5,11 +5,13 @@ import glob
 import vulture # type: ignore
 import mypy.api
 from enum import Enum
+from itertools import count
 
 from . import Utils
+from .Utils import Func
 
 class LintResult(Enum):
-    SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, NO_FUTURE_ANNOT_ERR = range(5)
+    SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
 
 def test_vulture() -> bool:
     v = vulture.Vulture()
@@ -44,11 +46,27 @@ def test_future_annotations() -> bool:
                 return False
     return True
 
+def func_has_annotations(lines: list[str], func: Func) -> bool:
+    if ') -> ' not in next(lines[i] for i in count(func.line_index) if ')' in lines[i]):
+        print(f"{str(func)} doesn't have a return type annotation")
+        return False
+    return True
+
+def test_function_annotations() -> bool:
+    lines = Utils.get_lines_all_py_files(['tests.py'])
+    return all([func_has_annotations(lines, func) for func in Utils.find_funcs(lines)])
+    # Using a list comprehension instead of a generator expression so that all functions without
+    # annotations are printed to the screen in `func_has_annotations`.
+
 def run_linters() -> LintResult:
     settings: dict[str, float | int] = {'MinVersion': 3.8, 'NumIncompatibleVersions': 2}
     settings.update(Utils.read_json_file('.lintception'))
     Utils.assertions_for_settings_dict(settings)
-    tests = ((test_vulture, LintResult.VULTURE_ERR), (test_mypy, LintResult.MYPY_ERR),
-             (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
-             (test_future_annotations, LintResult.NO_FUTURE_ANNOT_ERR))
+    tests = (
+        (test_vulture, LintResult.VULTURE_ERR),
+        (test_mypy, LintResult.MYPY_ERR),
+        (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
+        (test_future_annotations, LintResult.NO_FUTURE_ANNOT_ERR),
+        (test_function_annotations, LintResult.NO_FUNC_ANNOT_ERR),
+    )
     return next((x[1] for x in tests if not x[0]()), LintResult.SUCCESS)

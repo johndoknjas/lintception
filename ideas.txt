@@ -16,5 +16,12 @@
     - E.g., could track the lines of all the functions in the project, and then if the latest function
       a call is after is the same function as the one being called, it's likely recursive (or a global call).
 
-# Test that there are no function definitions with the same name as commonly used (esp builtin)
+- Test that there are no function definitions with the same name as commonly used (esp builtin)
   function names. E.g., sum, count (from itertools), all, any, etc.
+
+- Update the future annotations test so that __init__ files (or whichever files the user wants to check
+  are empty) having no code is either a separate test, or an assert is done for it.
+
+- In the future annotations test, print the file(s) that are missing the annotations import.
+
+- For lines where the first word is 'def', verify it's not part of a comment before concluding it's a function.
