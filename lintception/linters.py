@@ -1,14 +1,12 @@
 from __future__ import annotations
 import subprocess
 from subprocess import PIPE
-import glob
 import vulture # type: ignore
 import mypy.api
 from enum import Enum
-from itertools import count
 
 from . import Utils
-from .Utils import Func
+from .Utils import Func, Line
 
 class LintResult(Enum):
     SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
@@ -33,7 +31,7 @@ def test_vermin(settings: dict) -> bool:
             (result.returncode, result.stderr) == (0, ''))
 
 def test_future_annotations() -> bool:
-    for filename in glob.iglob('**/*.py', recursive=True):
+    for filename in Utils.get_python_filenames():
         assert filename.endswith(".py")
         with open(filename) as file:
             first_code_line = next(
@@ -46,8 +44,11 @@ def test_future_annotations() -> bool:
                 return False
     return True
 
-def func_has_annotations(lines: list[str], func: Func) -> bool:
-    if ') -> ' not in next(lines[i] for i in count(func.line_index) if ')' in lines[i]):
+def func_has_annotations(lines: list[Line], func: Func) -> bool:
+    lines = sorted([l for l in lines if l.line_loc.filename == func.line_loc.filename and
+                                        l.line_loc.line_index >= func.line_loc.line_index],
+                   key=lambda l: l.line_loc.line_index)
+    if ') -> ' not in next(l.line_str for l in lines if ')' in l.line_str):
         print(f"{str(func)} doesn't have a return type annotation")
         return False
     return True
