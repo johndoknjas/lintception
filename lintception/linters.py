@@ -11,11 +11,12 @@ from .Utils import Func, Line
 class LintResult(Enum):
     SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
 
-def test_vulture() -> bool:
+def test_vulture(settings: dict) -> bool:
+    # https://stackoverflow.com/a/59564370/7743427
     v = vulture.Vulture()
     v.scavenge(['.'])
-    return not v.get_unused_code()
-    # https://stackoverflow.com/a/59564370/7743427
+    exclude = settings.get('NoVulture', [])
+    return all(any(str(item.filename).endswith(x) for x in exclude) for item in v.get_unused_code())
 
 def test_mypy() -> bool:
     return mypy.api.run(['.']) == (
@@ -64,7 +65,7 @@ def run_linters() -> LintResult:
     settings.update(Utils.read_json_file('.lintception'))
     Utils.assertions_for_settings_dict(settings)
     tests = (
-        (test_vulture, LintResult.VULTURE_ERR),
+        (lambda: test_vulture(settings), LintResult.VULTURE_ERR),
         (test_mypy, LintResult.MYPY_ERR),
         (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
         (test_future_annotations, LintResult.NO_FUTURE_ANNOT_ERR),

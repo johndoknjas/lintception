@@ -20,8 +20,7 @@ class Line:
     line_str: str
 
 def assertions_for_settings_dict(settings: dict) -> None:
-    assert (settings.keys() == {'MinVersion', 'NumIncompatibleVersions'} and
-            isinstance(settings['MinVersion'], float) and
+    assert (isinstance(settings['MinVersion'], float) and
             isinstance(settings['NumIncompatibleVersions'], int))
 
 def is_code_line(line: str) -> bool:
