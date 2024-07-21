@@ -31,9 +31,11 @@ def test_vermin(settings: dict) -> bool:
     return (result.stdout.strip().endswith(expected_ending) and
             (result.returncode, result.stderr) == (0, ''))
 
-def test_future_annotations() -> bool:
+def test_future_annotations(settings: dict) -> bool:
     for filename in Utils.get_python_filenames():
         assert filename.endswith(".py")
+        if any(filename.endswith(x) for x in settings.get('NoFutureAnnot', [])):
+            continue
         with open(filename) as file:
             first_code_line = next(
                 (line.rstrip('\n') for line in file.readlines() if Utils.is_code_line(line)), None
@@ -68,7 +70,7 @@ def run_linters() -> LintResult:
         (lambda: test_vulture(settings), LintResult.VULTURE_ERR),
         (test_mypy, LintResult.MYPY_ERR),
         (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
-        (test_future_annotations, LintResult.NO_FUTURE_ANNOT_ERR),
+        (lambda: test_future_annotations(settings), LintResult.NO_FUTURE_ANNOT_ERR),
         (test_function_annotations, LintResult.NO_FUNC_ANNOT_ERR),
     )
     return next((x[1] for x in tests if not x[0]()), LintResult.SUCCESS)
