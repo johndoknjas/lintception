@@ -1,15 +1,20 @@
 from __future__ import annotations
 import subprocess
 from subprocess import PIPE
+from io import StringIO
+from enum import Enum
+
 import vulture # type: ignore
 import mypy.api
-from enum import Enum
+from pylint.lint import Run, pylinter
+from pylint.reporters.text import TextReporter
 
 from . import Utils
 from .Utils import Func, Line
 
 class LintResult(Enum):
-    SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
+    SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, PYLINT_ERR, NO_FUTURE_ANNOT_ERR, \
+    NO_FUNC_ANNOT_ERR = range(7)
 
 def test_vulture(settings: dict) -> bool:
     # https://stackoverflow.com/a/59564370/7743427
@@ -19,9 +24,9 @@ def test_vulture(settings: dict) -> bool:
     return all(any(str(item.filename).endswith(x) for x in exclude) for item in v.get_unused_code())
 
 def test_mypy() -> bool:
-    return mypy.api.run(['.']) == (
-        f'Success: no issues found in {Utils.num_python_files()} source files\n', '', 0
-    )
+    result = mypy.api.run(['.'])
+    return (result[0].endswith(f'Success: no issues found in {Utils.num_python_files()} source files\n') and
+            result[1:] == ('', 0))
     # https://mypy.readthedocs.io/en/stable/extending_mypy.html#integrating-mypy-into-another-python-application
 
 def test_vermin(settings: dict) -> bool:
@@ -30,6 +35,19 @@ def test_vermin(settings: dict) -> bool:
                        f"Incompatible versions:     {settings['NumIncompatibleVersions']}")
     return (result.stdout.strip().endswith(expected_ending) and
             (result.returncode, result.stderr) == (0, ''))
+
+def test_pylint(settings: dict) -> bool:
+    pylinter.MANAGER.clear_cache()
+    pylint_output = StringIO()
+    Run(["--disable=C0301, C0302, C0103, R0902, R0913, C0116, R0911, R0914, R0912, C0115, C0123, R0904, " +
+         "C0114, I1101, W1510, W1514, W0108, C0304, E0401, W0719, R0801, R1729",
+         settings.get('module', '.')], reporter=TextReporter(pylint_output), exit=False)
+    lines = pylint_output.getvalue().split('\n')
+    if any("Your code has been rated at 10.00/10" in line for line in lines):
+        return True
+    for line in lines:
+        print(line)
+    return False
 
 def test_future_annotations(settings: dict) -> bool:
     for filename in Utils.get_python_filenames():
@@ -70,6 +88,7 @@ def run_linters() -> LintResult:
         (lambda: test_vulture(settings), LintResult.VULTURE_ERR),
         (test_mypy, LintResult.MYPY_ERR),
         (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
+        (lambda: test_pylint(settings), LintResult.PYLINT_ERR),
         (lambda: test_future_annotations(settings), LintResult.NO_FUTURE_ANNOT_ERR),
         (test_function_annotations, LintResult.NO_FUNC_ANNOT_ERR),
     )

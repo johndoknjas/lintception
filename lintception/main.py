@@ -10,7 +10,7 @@ def main() -> None:
     if (result := linters.run_linters()) != linters.LintResult.SUCCESS:
         print(f"Error: {result.name}")
         sys.exit(0)
-    print('\nvulture, mypy, and vermin found no errors.')
+    print('\nvulture, mypy, vermin, and pylint found no errors.')
     print('Also, all python files have a future annotations import at the top, and ', end='')
     print('all functions have a return type annotation.\n')
     my_linter.main()

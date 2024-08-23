@@ -1,3 +1,3 @@
 # lintception
 
-Runs a few popular linters in series (mypy, vulture, vermin), and also does some other checks.
+Runs a few popular linters in series (mypy, vulture, vermin, pylint), and also does some other checks.

@@ -10,11 +10,12 @@ authors = [
   { name="John Doknjas", email="jdoknjas@sfu.ca" },
 ]
 description = "Runs a few popular linters in series (mypy, vulture, vermin), and also does some other checks."
-keywords = ["linter", "mypy", "vulture", "vermin", "testing", "linting", "lintception"]
+keywords = ["linter", "mypy", "vulture", "vermin", "pylint", "testing", "linting", "lintception"]
 dependencies = [
   "mypy",
   "vulture",
   "vermin",
+  "pylint",
 ]
 readme = "README.md"
 

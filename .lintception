@@ -1,4 +1,5 @@
 {
   "MinVersion": 3.8,
-  "NumIncompatibleVersions": 2
+  "NumIncompatibleVersions": 2,
+  "module": "lintception"
 }
