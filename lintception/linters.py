@@ -13,8 +13,7 @@ from . import Utils
 from .Utils import Func, Line
 
 class LintResult(Enum):
-    SUCCESS, MYPY_ERR, VULTURE_ERR, VERMIN_ERR, PYLINT_ERR, NO_FUTURE_ANNOT_ERR, \
-    NO_FUNC_ANNOT_ERR = range(7)
+    MYPY_ERR, VULTURE_ERR, VERMIN_ERR, PYLINT_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
 
 def test_vulture(settings: dict) -> bool:
     # https://stackoverflow.com/a/59564370/7743427
@@ -76,20 +75,22 @@ def func_has_annotations(lines: list[Line], func: Func) -> bool:
 
 def test_function_annotations() -> bool:
     lines = Utils.get_lines_all_py_files(['tests.py'])
-    return all([func_has_annotations(lines, func) for func in Utils.find_funcs(lines)])
-    # Using a list comprehension instead of a generator expression so that all functions without
+    has_annotations = [func_has_annotations(lines, func) for func in Utils.find_funcs(lines)]
+    # Using a list instead of a generator expression so that all functions without
     # annotations are printed to the screen in `func_has_annotations`.
+    print('\n\n')
+    return all(has_annotations)
 
-def run_linters() -> LintResult:
+def run_linters() -> list[LintResult]:
     settings: dict[str, float | int] = {'MinVersion': 3.8, 'NumIncompatibleVersions': 2}
     settings.update(Utils.read_json_file('.lintception'))
     Utils.assertions_for_settings_dict(settings)
     tests = (
-        (lambda: test_vulture(settings), LintResult.VULTURE_ERR),
-        (test_mypy, LintResult.MYPY_ERR),
-        (lambda: test_vermin(settings), LintResult.VERMIN_ERR),
-        (lambda: test_pylint(settings), LintResult.PYLINT_ERR),
-        (lambda: test_future_annotations(settings), LintResult.NO_FUTURE_ANNOT_ERR),
-        (test_function_annotations, LintResult.NO_FUNC_ANNOT_ERR),
+        (test_future_annotations(settings), LintResult.NO_FUTURE_ANNOT_ERR),
+        (test_function_annotations(), LintResult.NO_FUNC_ANNOT_ERR),
+        (test_vulture(settings), LintResult.VULTURE_ERR),
+        (test_mypy(), LintResult.MYPY_ERR),
+        (test_vermin(settings), LintResult.VERMIN_ERR),
+        (test_pylint(settings), LintResult.PYLINT_ERR),
     )
-    return next((x[1] for x in tests if not x[0]()), LintResult.SUCCESS)
+    return [x[1] for x in tests if not x[0]]

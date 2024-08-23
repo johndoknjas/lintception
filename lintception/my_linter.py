@@ -34,3 +34,4 @@ def main() -> None:
     for f in funcs_used_once:
         print(f"Func {f[0].name} (line {f[0].line_loc.line_index} of {f[0].line_loc.filename}) " +
               f"is only referenced at line {f[1].line_loc.line_index} of {f[1].line_loc.filename}")
+    print('\n\n\n')

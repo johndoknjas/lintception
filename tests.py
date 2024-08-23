@@ -10,7 +10,7 @@ class Tests:
     """
 
     def test_self(self):
-        assert linters.run_linters() == linters.LintResult.SUCCESS
+        assert linters.run_linters() == []
 
 if __name__ == '__main__':
     raise RuntimeError("Should call with pytest")
