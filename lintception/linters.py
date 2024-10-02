@@ -8,12 +8,14 @@ import vulture # type: ignore
 import mypy.api
 from pylint.lint import Run, pylinter
 from pylint.reporters.text import TextReporter
+import pytype
 
 from . import Utils
 from .Utils import Func, Line
 
 class LintResult(Enum):
-    MYPY_ERR, VULTURE_ERR, VERMIN_ERR, PYLINT_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR = range(6)
+    (MYPY_ERR, VULTURE_ERR, VERMIN_ERR, PYLINT_ERR, NO_FUTURE_ANNOT_ERR, NO_FUNC_ANNOT_ERR,
+     PYTYPE_ERR) = range(7)
 
 def test_vulture(settings: dict) -> bool:
     # https://stackoverflow.com/a/59564370/7743427
@@ -34,6 +36,11 @@ def test_vermin(settings: dict) -> bool:
                        f"Incompatible versions:     {settings['NumIncompatibleVersions']}")
     return (result.stdout.strip().endswith(expected_ending) and
             (result.returncode, result.stderr) == (0, ''))
+
+def test_pytype(settings: dict) -> bool:
+    result = subprocess.run(['pytype', settings.get('module', '.')],
+                            stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    return result.stdout.strip().endswith('Success: no errors found')
 
 def test_pylint(settings: dict) -> bool:
     pylinter.MANAGER.clear_cache()
@@ -92,5 +99,6 @@ def run_linters() -> list[LintResult]:
         (test_mypy(), LintResult.MYPY_ERR),
         (test_vermin(settings), LintResult.VERMIN_ERR),
         (test_pylint(settings), LintResult.PYLINT_ERR),
+        (test_pytype(settings), LintResult.PYTYPE_ERR),
     )
     return [x[1] for x in tests if not x[0]]

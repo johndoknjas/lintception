@@ -9,13 +9,14 @@ version = "1.0.2"
 authors = [
   { name="John Doknjas", email="jdoknjas@sfu.ca" },
 ]
-description = "Runs a few popular linters in series (mypy, vulture, vermin, pylint), and also does some other checks."
-keywords = ["linter", "mypy", "vulture", "vermin", "pylint", "testing", "linting", "lintception"]
+description = "Runs a few popular linters in series (mypy, vulture, vermin, pylint, pytype), and also does some other checks."
+keywords = ["linter", "mypy", "vulture", "vermin", "pylint", "pytype", "testing", "linting", "lintception"]
 dependencies = [
   "mypy",
   "vulture",
   "vermin",
   "pylint",
+  "pytype",
 ]
 readme = "README.md"
 

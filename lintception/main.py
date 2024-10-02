@@ -11,7 +11,7 @@ def main() -> None:
         for error in errors:
             print(f"Error: {error.name}")
     else:
-        print('\nvulture, mypy, vermin, and pylint found no errors.')
+        print('\nvulture, mypy, vermin, pylint, and pytype found no errors.')
         print('Also, all python files have a future annotations import at the top, and ', end='')
         print('all functions have a return type annotation.\n')
 
