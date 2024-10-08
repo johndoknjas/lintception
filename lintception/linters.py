@@ -1,6 +1,5 @@
 from __future__ import annotations
 import subprocess
-from subprocess import PIPE
 from io import StringIO
 from enum import Enum
 
@@ -8,7 +7,6 @@ import vulture # type: ignore
 import mypy.api
 from pylint.lint import Run, pylinter
 from pylint.reporters.text import TextReporter
-import pytype
 
 from . import Utils
 from .Utils import Func, Line
@@ -31,16 +29,14 @@ def test_mypy() -> bool:
     # https://mypy.readthedocs.io/en/stable/extending_mypy.html#integrating-mypy-into-another-python-application
 
 def test_vermin(settings: dict) -> bool:
-    result = subprocess.run(['vermin', '.'], stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    result = subprocess.run(['vermin', '.'], capture_output=True, text=True)
     expected_ending = (f"Minimum required versions: {settings['MinVersion']}\n" +
                        f"Incompatible versions:     {settings['NumIncompatibleVersions']}")
     return (result.stdout.strip().endswith(expected_ending) and
             (result.returncode, result.stderr) == (0, ''))
 
 def test_pytype(settings: dict) -> bool:
-    result = subprocess.run(['pytype', settings.get('module', '.')],
-                            stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    return result.stdout.strip().endswith('Success: no errors found')
+    return subprocess.run(['pytype', settings.get('module', '.')]).returncode == 0
 
 def test_pylint(settings: dict) -> bool:
     pylinter.MANAGER.clear_cache()
